@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Over welk object gaan deze excuses?</title>
+<style>
+  @font-face {
+    font-family: "Big Noodle Titling";
+    src: url("fonts/BigNoodleTitling-Oblique.woff2") format("woff2"),
+         url("fonts/big_noodle_titling_oblique.ttf") format("truetype");
+    font-style: oblique;
+    font-weight: normal;
+  }
+
+  :root {
+    --zwart: #000;
+    --roze: #d9538f;
+    --lichtroze: #f3c3de;
+    --groen: #98dc88;
+    --lichtgroen: #caf0ce;
+    --wit: #fff;
+    --c: min(5.4vw, 11vh);          /* celgrootte desktop */
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--zwart);
+    color: var(--wit);
+    font-family: "Big Noodle Titling", "Bebas Neue", Impact, sans-serif;
+    font-style: oblique;
+    text-transform: uppercase;
+    min-height: 100vh;
+  }
+
+  main {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: stretch;
+  }
+
+  /* ---------- Kruiswoordraadsel ---------- */
+  .raster {
+    display: flex; align-items: center; justify-content: center;
+    padding: 3vw;
+  }
+  #puzzel {
+    display: grid;
+    grid-template-columns: repeat(9, var(--c));
+    grid-template-rows: repeat(7, var(--c));
+  }
+  .cel {
+    position: relative;
+    background: var(--wit);
+    border: 3px solid var(--roze);
+    margin: -1.5px;
+  }
+  .cel input {
+    width: 100%; height: 100%;
+    border: 0; outline: 0; background: transparent;
+    text-align: center; text-transform: uppercase;
+    font: inherit; font-size: calc(var(--c) * .95);
+    line-height: 1; color: var(--groen);
+    caret-color: var(--roze);
+    padding: 0;
+  }
+  .cel.actief   { background: #fbe3f0; }
+  .cel.klaar    { background: var(--lichtgroen); }
+  .cel.fout     { animation: schud .4s; }
+  .cel .nr {
+    position: absolute; top: 1px; left: 3px;
+    font-size: calc(var(--c) * .26); color: var(--roze);
+    pointer-events: none; line-height: 1;
+  }
+  @keyframes schud {
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+  }
+
+  /* ---------- Vraag + excuses ---------- */
+  #tekst {
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 3vw 4vw 3vw 0;
+  }
+  h1 {
+    color: var(--roze); font-weight: normal;
+    font-size: clamp(44px, 6.6vw, 120px); line-height: .95;
+    margin-bottom: 2vw;
+  }
+  #hints { list-style: none; }
+  #hints li {
+    font-size: clamp(20px, 2.35vw, 44px);
+    line-height: 1.2; margin-bottom: .6vw; cursor: pointer;
+  }
+  #hints li b { color: var(--roze); font-weight: normal; margin-right: .5em; }
+  #hints li.klaar { opacity: .35; text-decoration: line-through; }
+
+  /* ---------- Onthulling ---------- */
+  #uitleg {
+    display: none;
+    background: var(--lichtgroen);
+    padding: 3vw 4vw;
+    flex-direction: column; justify-content: space-evenly;
+  }
+  .kaart { margin: 1.2vw 0; }
+  .kaart .prijs { display: block; font-size: clamp(12px, 1.2vw, 22px); color: var(--lichtroze); }
+  .kaart .naam  { display: block; font-size: clamp(34px, 5.2vw, 96px); line-height: .95; color: var(--roze); }
+  .kaart .notitie {
+    display: block; font-size: clamp(16px, 2vw, 36px);
+    color: var(--lichtroze); margin-left: 12%;
+  }
+  .kaart:nth-child(even) .notitie { text-align: right; margin: 0; }
+  #opnieuw {
+    all: unset; cursor: pointer; align-self: flex-start;
+    font-size: clamp(14px, 1.4vw, 24px); color: var(--roze);
+    border-bottom: 2px solid var(--roze);
+  }
+
+  body.opgelost #tekst  { display: none; }
+  body.opgelost #uitleg { display: flex; }
+  body.opgelost { animation: in .6s; }
+  @keyframes in { from { opacity: .3; } to { opacity: 1; } }
+
+  /* ---------- GSM ---------- */
+  @media (max-width: 760px) {
+    :root { --c: min(10.4vw, 9vh); }
+    main { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+    .raster { padding: 6vw 2vw 4vw; }
+    #tekst { padding: 4vw 6vw 8vw; }
+    h1 { font-size: 11vw; margin-bottom: 4vw; }
+    #hints li { font-size: 5.4vw; margin-bottom: 2vw; }
+    #uitleg { padding: 8vw 6vw; }
+    .kaart { margin: 4vw 0; }
+    .kaart .prijs { font-size: 3.2vw; }
+    .kaart .naam  { font-size: 11vw; }
+    .kaart .notitie { font-size: 5vw; }
+    #opnieuw { font-size: 4.5vw; margin-top: 4vw; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <section class="raster"><div id="puzzel"></div></section>
+
+  <section id="tekst">
+    <h1>Over welk object<br>gaan deze excuses?</h1>
+    <ol id="hints"></ol>
+  </section>
+
+  <section id="uitleg">
+    <div id="kaarten"></div>
+    <button id="opnieuw">Opnieuw spelen</button>
+  </section>
+</main>
+
+<script>
+  /* ====== Pas hier de woorden aan ======
+     r = rij, k = kolom (beginnen bij 0), r/k = beginpositie van het woord
+     r: "h" = horizontaal, "v" = verticaal                                  */
+  const woorden = [
+    { nr: 1, antwoord: "JAS",     r: 2, k: 2, dir: "h",
+      hint: "Heb echt nog niet genoeg jassen en zeker geen in suede dus ...",
+      naam: "Bruine suede jas", prijs: "139,00 euro", notitie: "Niet gekocht want te duur" },
+    { nr: 2, antwoord: "TOP",     r: 4, k: 1, dir: "v",
+      hint: "Zo een specifieke topje heb ik nog niet (50 andere wel)",
+      naam: "Gestreepte soft top", prijs: "22,95 euro", notitie: "Niet gekocht want heb een koopverbod" },
+    { nr: 3, antwoord: "TONER",   r: 5, k: 0, dir: "h",
+      hint: "Want ik doe zeker en vast iedere dag skincare",
+      naam: "Milky toner", prijs: "9,99 euro", notitie: "Wil ik nog kopen dus wrs wel" },
+    { nr: 4, antwoord: "HAKKEN",  r: 6, k: 3, dir: "h",
+      hint: "100 schoenen is toch net te weinig",
+      naam: "Zwarte sleehak pumps", prijs: "19,99 euro", notitie: "Oeps gekocht" },
+    { nr: 5, antwoord: "MASCARA", r: 0, k: 4, dir: "v",
+      hint: "Want 1 mascara is echt wel te weinig",
+      naam: "Bordeaux mascara", prijs: "4,99 euro", notitie: "Oeps gekocht" }
+  ];
+
+  const puzzel = document.getElementById("puzzel");
+  const cellen = {};               // "r,k" -> { el, input, woorden: [index,...] }
+  let actiefWoord = 0, actiefCel = null;
+
+  /* ---- Raster opbouwen ---- */
+  woorden.forEach((w, wi) => {
+    w.cellen = [];
+    [...w.antwoord].forEach((letter, i) => {
+      const r = w.r + (w.dir === "v" ? i : 0);
+      const k = w.k + (w.dir === "h" ? i : 0);
+      const sleutel = r + "," + k;
+      if (!cellen[sleutel]) {
+        const el = document.createElement("div");
+        el.className = "cel";
+        el.style.gridRow = r + 1;
+        el.style.gridColumn = k + 1;
+        const input = document.createElement("input");
+        input.maxLength = 1;
+        input.autocomplete = "off";
+        input.autocapitalize = "characters";
+        input.spellcheck = false;
+        input.setAttribute("aria-label", `Rij ${r + 1}, kolom ${k + 1}`);
+        el.appendChild(input);
+        puzzel.appendChild(el);
+        cellen[sleutel] = { el, input, r, k, woorden: [] };
+        koppel(cellen[sleutel]);
+      }
+      cellen[sleutel].woorden.push(wi);
+      w.cellen.push(cellen[sleutel]);
+      if (i === 0) {
+        const n = document.createElement("span");
+        n.className = "nr"; n.textContent = w.nr;
+        cellen[sleutel].el.appendChild(n);
+      }
+    });
+  });
+
+  /* ---- Hints ---- */
+  const hints = document.getElementById("hints");
+  woorden.forEach((w, wi) => {
+    const li = document.createElement("li");
+    li.innerHTML = `<b>${w.nr}</b>${w.hint}`;
+    li.addEventListener("click", () => { actiefWoord = wi; w.cellen[0].input.focus(); markeer(); });
+    w.li = li;
+    hints.appendChild(li);
+  });
+
+  /* ---- Onthulling opbouwen ---- */
+  document.getElementById("kaarten").innerHTML = woorden.map(w => `
+    <div class="kaart">
+      <span class="prijs">${w.prijs}</span>
+      <span class="naam">${w.naam}</span>
+      <span class="notitie">${w.notitie}</span>
+    </div>`).join("");
+
+  /* ---- Gedrag per cel ---- */
+  function koppel(c) {
+    const { input } = c;
+
+    input.addEventListener("focus", () => {
+      actiefCel = c;
+      if (!c.woorden.includes(actiefWoord)) actiefWoord = c.woorden[0];
+      markeer();
+      input.select();
+    });
+
+    input.addEventListener("mousedown", () => {        // tweede klik = richting wisselen
+      if (document.activeElement === input && c.woorden.length > 1) {
+        actiefWoord = c.woorden.find(i => i !== actiefWoord);
+        markeer();
+      }
+    });
+
+    input.addEventListener("input", () => {
+      const letter = (input.value.match(/[a-zA-Z]/) || [""])[0].toUpperCase();
+      input.value = letter;
+      if (letter) volgende(1);
+      controleer();
+    });
+
+    input.addEventListener("keydown", e => {
+      if (e.key === "Backspace") {
+        if (input.value) { input.value = ""; controleer(); }
+        else volgende(-1, true);
+        e.preventDefault();
+      } else if (e.key.startsWith("Arrow")) {
+        const d = { ArrowLeft: [0,-1], ArrowRight: [0,1], ArrowUp: [-1,0], ArrowDown: [1,0] }[e.key];
+        const buur = cellen[(c.r + d[0]) + "," + (c.k + d[1])];
+        if (buur) buur.input.focus();
+        e.preventDefault();
+      }
+    });
+  }
+
+  function volgende(stap, wis) {
+    const w = woorden[actiefWoord];
+    const i = w.cellen.indexOf(actiefCel) + stap;
+    if (i >= 0 && i < w.cellen.length) {
+      const doel = w.cellen[i];
+      doel.input.focus();
+      if (wis) { doel.input.value = ""; controleer(); }
+    }
+  }
+
+  function markeer() {
+    Object.values(cellen).forEach(c => c.el.classList.remove("actief"));
+    woorden[actiefWoord].cellen.forEach(c => c.el.classList.add("actief"));
+  }
+
+  /* ---- Controle ---- */
+  function controleer() {
+    let alleKlaar = true, alleGevuld = true;
+    woorden.forEach(w => {
+      const tekst = w.cellen.map(c => c.input.value).join("");
+      const klaar = tekst === w.antwoord;
+      w.cellen.forEach(c => { if (klaar) c.el.classList.add("klaar"); });
+      w.li.classList.toggle("klaar", klaar);
+      if (!klaar) {
+        alleKlaar = false;
+        w.cellen.forEach(c => {
+          if (!woorden.some(x => x !== w && x.cellen.includes(c) &&
+              x.cellen.map(y => y.input.value).join("") === x.antwoord)) {
+            c.el.classList.remove("klaar");
+          }
+        });
+      }
+    });
+    Object.values(cellen).forEach(c => { if (!c.input.value) alleGevuld = false; });
+
+    if (alleKlaar) {
+      setTimeout(() => {
+        document.body.classList.add("opgelost");
+        document.activeElement.blur();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        document.getElementById("uitleg").scrollIntoView({ behavior: "smooth" });
+      }, 700);
+    } else if (alleGevuld) {
+      Object.values(cellen).forEach(c => {
+        c.el.classList.remove("fout"); void c.el.offsetWidth; c.el.classList.add("fout");
+      });
+    }
+  }
+
+  document.getElementById("opnieuw").addEventListener("click", () => {
+    Object.values(cellen).forEach(c => { c.input.value = ""; c.el.classList.remove("klaar", "fout"); });
+    woorden.forEach(w => w.li.classList.remove("klaar"));
+    document.body.classList.remove("opgelost");
+    window.scrollTo(0, 0);
+  });
+</script>
+</body>
+</html>
